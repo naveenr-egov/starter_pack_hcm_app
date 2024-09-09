@@ -1,29 +1,15 @@
 import 'dart:async';
 
-import 'package:attendance_management/attendance_management.dart';
-import 'package:attendance_management/router/attendance_router.gm.dart';
-import 'package:closed_household/closed_household.dart';
-import 'package:closed_household/router/closed_household_router.gm.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:digit_components/digit_components.dart';
 import 'package:digit_components/widgets/atoms/digit_toaster.dart';
 import 'package:digit_components/widgets/digit_sync_dialog.dart';
 import 'package:digit_data_model/data_model.dart';
-import 'package:digit_dss/data/local_store/no_sql/schema/dashboard_config_schema.dart';
-import 'package:digit_dss/models/entities/dashboard_response_model.dart';
-import 'package:digit_dss/router/dashboard_router.gm.dart';
-import 'package:digit_dss/utils/utils.dart';
 import 'package:drift_db_viewer/drift_db_viewer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:inventory_management/inventory_management.dart';
-import 'package:inventory_management/router/inventory_router.gm.dart';
-import 'package:referral_reconciliation/referral_reconciliation.dart';
-import 'package:referral_reconciliation/router/referral_reconciliation_router.gm.dart';
-import 'package:registration_delivery/registration_delivery.dart';
-import 'package:registration_delivery/router/registration_delivery_router.gm.dart';
 import 'package:sync_service/blocs/sync/sync.dart';
 
 import '../blocs/app_initialization/app_initialization.dart';
@@ -138,18 +124,6 @@ class _HomePageState extends LocalizedState<HomePage> {
                   showcaseFor: showcaseKeys.toSet().toList(),
                 ),
               ),
-              skipProgressBar
-                  ? const SizedBox.shrink()
-                  : homeShowcaseData.distributorProgressBar.buildWith(
-                      child: BeneficiaryProgressBar(
-                        label: localizations.translate(
-                          i18.home.progressIndicatorTitle,
-                        ),
-                        prefixLabel: localizations.translate(
-                          i18.home.progressIndicatorPrefixLabel,
-                        ),
-                      ),
-                    ),
             ],
           ),
           footer: PoweredByDigit(
@@ -313,67 +287,6 @@ class _HomePageState extends LocalizedState<HomePage> {
 
     final Map<String, Widget> homeItemsMap = {
       // INFO : Need to add home items of package Here
-      i18.home.dashboard: homeShowcaseData.dashBoard.buildWith(
-        child: HomeItemCard(
-          icon: Icons.bar_chart_sharp,
-          label: i18.home.dashboard,
-          onPressed: () {
-            context.router.push(const UserDashboardRoute());
-          },
-        ),
-      ),
-
-      i18.home.beneficiaryLabel:
-          homeShowcaseData.distributorBeneficiaries.buildWith(
-        child: HomeItemCard(
-          icon: Icons.all_inbox,
-          label: i18.home.beneficiaryLabel,
-          onPressed: () async {
-            await context.router.push(const RegistrationDeliveryWrapperRoute());
-          },
-        ),
-      ),
-      i18.home.closedHouseHoldLabel: homeShowcaseData.closedHouseHold.buildWith(
-        child: HomeItemCard(
-          icon: Icons.home,
-          enableCustomIcon: true,
-          customIconSize: 48,
-          customIcon: Constants.closedHouseholdSvg,
-          label: i18.home.closedHouseHoldLabel,
-          onPressed: () {
-            context.router.push(const ClosedHouseholdWrapperRoute());
-          },
-        ),
-      ),
-      i18.home.manageStockLabel:
-          homeShowcaseData.warehouseManagerManageStock.buildWith(
-        child: HomeItemCard(
-          icon: Icons.store_mall_directory,
-          label: i18.home.manageStockLabel,
-          onPressed: () {
-            context.read<AppInitializationBloc>().state.maybeWhen(
-                  orElse: () {},
-                  initialized: (
-                    AppConfiguration appConfiguration,
-                    _,
-                    __,
-                  ) {
-                    context.router.push(ManageStocksRoute());
-                  },
-                );
-          },
-        ),
-      ),
-      i18.home.stockReconciliationLabel:
-          homeShowcaseData.wareHouseManagerStockReconciliation.buildWith(
-        child: HomeItemCard(
-          icon: Icons.menu_book,
-          label: i18.home.stockReconciliationLabel,
-          onPressed: () {
-            context.router.push(StockReconciliationRoute());
-          },
-        ),
-      ),
       i18.home.myCheckList: homeShowcaseData.supervisorMyChecklist.buildWith(
         child: HomeItemCard(
           enableCustomIcon: true,
@@ -420,44 +333,6 @@ class _HomePageState extends LocalizedState<HomePage> {
           },
         ),
       ),
-      i18.home.beneficiaryReferralLabel:
-          homeShowcaseData.hfBeneficiaryReferral.buildWith(
-        child: HomeItemCard(
-          icon: Icons.supervised_user_circle_rounded,
-          label: i18.home.beneficiaryReferralLabel,
-          onPressed: () async {
-            context.read<AppInitializationBloc>().state.maybeWhen(
-                  orElse: () {},
-                  initialized: (
-                    AppConfiguration appConfiguration,
-                    _,
-                    __,
-                  ) {
-                    context.router.push(SearchReferralReconciliationsRoute());
-                  },
-                );
-          },
-        ),
-      ),
-      i18.home.viewReportsLabel: homeShowcaseData.inventoryReport.buildWith(
-        child: HomeItemCard(
-          icon: Icons.announcement,
-          label: i18.home.viewReportsLabel,
-          onPressed: () {
-            context.router.push(InventoryReportSelectionRoute());
-          },
-        ),
-      ),
-      i18.home.manageAttendanceLabel:
-          homeShowcaseData.manageAttendance.buildWith(
-        child: HomeItemCard(
-          icon: Icons.fingerprint_outlined,
-          label: i18.home.manageAttendanceLabel,
-          onPressed: () {
-            context.router.push(const ManageAttendanceRoute());
-          },
-        ),
-      ),
       i18.home.db: homeShowcaseData.db.buildWith(
         child: HomeItemCard(
           icon: Icons.table_chart,
@@ -473,54 +348,23 @@ class _HomePageState extends LocalizedState<HomePage> {
           },
         ),
       ),
-      i18.home.dashboard: homeShowcaseData.dashBoard.buildWith(
-        child: HomeItemCard(
-          icon: Icons.bar_chart_sharp,
-          label: i18.home.dashboard,
-          onPressed: () {
-            context.router.push(const UserDashboardRoute());
-          },
-        ),
-      ),
     };
 
     final Map<String, GlobalKey> homeItemsShowcaseMap = {
       // INFO : Need to add showcase keys of package Here
-      i18.home.beneficiaryLabel:
-          homeShowcaseData.distributorBeneficiaries.showcaseKey,
-      i18.home.manageStockLabel:
-          homeShowcaseData.warehouseManagerManageStock.showcaseKey,
-      i18.home.stockReconciliationLabel:
-          homeShowcaseData.wareHouseManagerStockReconciliation.showcaseKey,
       i18.home.myCheckList: homeShowcaseData.supervisorMyChecklist.showcaseKey,
       i18.home.fileComplaint:
           homeShowcaseData.distributorFileComplaint.showcaseKey,
       i18.home.syncDataLabel: homeShowcaseData.distributorSyncData.showcaseKey,
-      i18.home.viewReportsLabel: homeShowcaseData.inventoryReport.showcaseKey,
-      i18.home.beneficiaryReferralLabel:
-          homeShowcaseData.hfBeneficiaryReferral.showcaseKey,
-      i18.home.manageAttendanceLabel:
-          homeShowcaseData.manageAttendance.showcaseKey,
       i18.home.db: homeShowcaseData.db.showcaseKey,
-      i18.home.closedHouseHoldLabel:
-          homeShowcaseData.closedHouseHold.showcaseKey,
-      i18.home.dashboard: homeShowcaseData.dashBoard.showcaseKey,
     };
 
     final homeItemsLabel = <String>[
       // INFO: Need to add items label of package Here
-      i18.home.beneficiaryLabel,
-      i18.home.closedHouseHoldLabel,
-      i18.home.manageStockLabel,
-      i18.home.stockReconciliationLabel,
       i18.home.myCheckList,
       i18.home.fileComplaint,
       i18.home.syncDataLabel,
-      i18.home.viewReportsLabel,
-      i18.home.beneficiaryReferralLabel,
-      i18.home.manageAttendanceLabel,
       i18.home.db,
-      i18.home.dashboard,
     ];
 
     final List<String> filteredLabels = homeItemsLabel
@@ -557,63 +401,19 @@ class _HomePageState extends LocalizedState<HomePage> {
                 // INFO : Need to add local repo of package Here
                 context.read<
                     LocalRepository<IndividualModel, IndividualSearchModel>>(),
-                context.read<
-                    LocalRepository<HouseholdModel, HouseholdSearchModel>>(),
-                context.read<
-                    LocalRepository<ProjectBeneficiaryModel,
-                        ProjectBeneficiarySearchModel>>(),
-                context.read<
-                    LocalRepository<HouseholdMemberModel,
-                        HouseholdMemberSearchModel>>(),
-                context.read<LocalRepository<TaskModel, TaskSearchModel>>(),
-                context.read<
-                    LocalRepository<SideEffectModel, SideEffectSearchModel>>(),
-                context.read<
-                    LocalRepository<ReferralModel, ReferralSearchModel>>(),
                 context
                     .read<LocalRepository<ServiceModel, ServiceSearchModel>>(),
-                context.read<LocalRepository<StockModel, StockSearchModel>>(),
-                context.read<
-                    LocalRepository<StockReconciliationModel,
-                        StockReconciliationSearchModel>>(),
                 context.read<
                     LocalRepository<PgrServiceModel, PgrServiceSearchModel>>(),
-                context.read<
-                    LocalRepository<HFReferralModel, HFReferralSearchModel>>(),
-                context.read<
-                    LocalRepository<AttendanceLogModel,
-                        AttendanceLogSearchModel>>(),
               ],
               remoteRepositories: [
                 // INFO : Need to add repo repo of package Here
                 context.read<
                     RemoteRepository<IndividualModel, IndividualSearchModel>>(),
-                context.read<
-                    RemoteRepository<HouseholdModel, HouseholdSearchModel>>(),
-                context.read<
-                    RemoteRepository<ProjectBeneficiaryModel,
-                        ProjectBeneficiarySearchModel>>(),
-                context.read<
-                    RemoteRepository<HouseholdMemberModel,
-                        HouseholdMemberSearchModel>>(),
-                context.read<RemoteRepository<TaskModel, TaskSearchModel>>(),
-                context.read<
-                    RemoteRepository<SideEffectModel, SideEffectSearchModel>>(),
-                context.read<
-                    RemoteRepository<ReferralModel, ReferralSearchModel>>(),
                 context
                     .read<RemoteRepository<ServiceModel, ServiceSearchModel>>(),
-                context.read<RemoteRepository<StockModel, StockSearchModel>>(),
-                context.read<
-                    RemoteRepository<StockReconciliationModel,
-                        StockReconciliationSearchModel>>(),
                 context.read<
                     RemoteRepository<PgrServiceModel, PgrServiceSearchModel>>(),
-                context.read<
-                    RemoteRepository<HFReferralModel, HFReferralSearchModel>>(),
-                context.read<
-                    RemoteRepository<AttendanceLogModel,
-                        AttendanceLogSearchModel>>(),
               ],
             ),
           );
@@ -628,117 +428,9 @@ void setPackagesSingleton(BuildContext context) {
       initialized: (
         AppConfiguration appConfiguration,
         List<ServiceRegistry> serviceRegistry,
-        DashboardConfigSchema? dashboardConfigSchema,
       ) {
         loadLocalization(context, appConfiguration);
         // INFO : Need to add singleton of package Here
-        RegistrationDeliverySingleton().setInitialData(
-          loggedInUser: context.loggedInUserModel,
-          loggedInUserUuid: context.loggedInUserUuid,
-          maxRadius: appConfiguration.maxRadius!,
-          projectId: context.projectId,
-          selectedBeneficiaryType: context.beneficiaryType,
-          projectType: context.selectedProjectType,
-          selectedProject: context.selectedProject,
-          genderOptions:
-              appConfiguration.genderOptions!.map((e) => e.code).toList(),
-          idTypeOptions:
-              appConfiguration.idTypeOptions!.map((e) => e.code).toList(),
-          householdDeletionReasonOptions: appConfiguration
-              .householdDeletionReasonOptions!
-              .map((e) => e.code)
-              .toList(),
-          householdMemberDeletionReasonOptions: appConfiguration
-              .householdMemberDeletionReasonOptions!
-              .map((e) => e.code)
-              .toList(),
-          deliveryCommentOptions: appConfiguration.deliveryCommentOptions!
-              .map((e) => e.code)
-              .toList(),
-          symptomsTypes:
-              appConfiguration.symptomsTypes?.map((e) => e.code).toList(),
-          searchHouseHoldFilter: appConfiguration.searchHouseHoldFilters != null
-              ? appConfiguration.searchHouseHoldFilters!
-                  .map((e) => e.code)
-                  .toList()
-              : [],
-          referralReasons:
-              appConfiguration.referralReasons?.map((e) => e.code).toList(),
-          houseStructureTypes:
-              appConfiguration.houseStructureTypes?.map((e) => e.code).toList(),
-          refusalReasons:
-              appConfiguration.refusalReasons?.map((e) => e.code).toList(),
-        );
-
-        ClosedHouseholdSingleton().setInitialData(
-          loggedInUserUuid: context.loggedInUserUuid,
-          projectId: context.projectId,
-          beneficiaryType: context.beneficiaryType,
-        );
-
-        AttendanceSingleton().setInitialData(
-          projectId: context.projectId,
-          loggedInIndividualId: context.loggedInIndividualId ?? '',
-          loggedInUserUuid: context.loggedInUserUuid,
-          appVersion: Constants().version,
-        );
-
-        ReferralReconSingleton().setInitialData(
-          userName: context.loggedInUser.name ?? '',
-          userUUid: context.loggedInUserUuid,
-          projectId: context.selectedProject.id,
-          projectName: context.selectedProject.name,
-          roleCode: RolesType.healthFacilityWorker.toValue(),
-          appVersion: Constants().version,
-          tenantId: envConfig.variables.tenantId,
-          validIndividualAgeForCampaign: ValidIndividualAgeForCampaign(
-            validMinAge: context.selectedProjectType?.validMinAge ?? 3,
-            validMaxAge: context.selectedProjectType?.validMaxAge ?? 64,
-          ),
-          genderOptions:
-              appConfiguration.genderOptions?.map((e) => e.code).toList() ?? [],
-          cycles: context.cycles,
-          referralReasons:
-              appConfiguration.referralReasons?.map((e) => e.code).toList() ??
-                  [],
-          checklistTypes:
-              appConfiguration.checklistTypes?.map((e) => e.code).toList() ??
-                  [],
-        );
-
-        InventorySingleton().setInitialData(
-          isWareHouseMgr: context.loggedInUserRoles
-              .where(
-                  (role) => role.code == RolesType.warehouseManager.toValue())
-              .toList()
-              .isNotEmpty,
-          isDistributor: context.loggedInUserRoles
-              .where(
-                (role) => role.code == RolesType.distributor.toValue(),
-              )
-              .toList()
-              .isNotEmpty,
-          loggedInUser: context.loggedInUserModel,
-          projectId: context.projectId,
-          loggedInUserUuid: context.loggedInUserUuid,
-          transportTypes: appConfiguration.transportTypes
-              ?.map((e) => InventoryTransportTypes()
-                ..name = e.code
-                ..code = e.code)
-              .toList(),
-        );
-        DashboardSingleton().setInitialData(
-            projectId: context.projectId,
-            tenantId: envConfig.variables.tenantId,
-            dashboardConfig: dashboardConfigSchema,
-            appVersion: Constants().version,
-            selectedProject: context.selectedProject,
-            actionPath: Constants.getEndPoint(
-              serviceRegistry: serviceRegistry,
-              service: DashboardResponseModel.schemaName.toUpperCase(),
-              action: ApiOperation.search.toValue(),
-              entityName: DashboardResponseModel.schemaName,
-            ));
       });
 }
 

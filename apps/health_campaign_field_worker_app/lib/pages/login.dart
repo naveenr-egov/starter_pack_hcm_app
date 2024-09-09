@@ -130,7 +130,7 @@ class _LoginPageState extends LocalizedState<LoginPage> {
                           builder: (context, initState) {
                         final privacyPolicyJson = initState.maybeWhen(
                             initialized:
-                                (AppConfiguration appConfiguration, _, __) =>
+                                (AppConfiguration appConfiguration, _) =>
                                     appConfiguration.privacyPolicyConfig,
                             orElse: () => null);
                         if (privacyPolicyJson?.active == false) {

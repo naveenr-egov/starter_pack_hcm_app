@@ -1,18 +1,12 @@
-import 'package:attendance_management/attendance_management.dart';
-import 'package:closed_household/utils/utils.dart';
 import 'package:collection/collection.dart';
 import 'package:digit_components/utils/app_logger.dart';
 import 'package:digit_data_model/data_model.dart';
-import 'package:digit_dss/digit_dss.dart';
 import 'package:digit_firebase_services/digit_firebase_services.dart'
     as firebase_services;
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:inventory_management/inventory_management.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:referral_reconciliation/referral_reconciliation.dart';
-import 'package:registration_delivery/registration_delivery.dart';
 import 'package:sync_service/sync_service_lib.dart';
 
 import '../data/local_store/no_sql/schema/app_configuration.dart';
@@ -64,8 +58,6 @@ class Constants {
           OpLogSchema,
           ProjectTypeListCycleSchema,
           RowVersionListSchema,
-          DashboardConfigSchemaSchema,
-          DashboardResponseSchema,
         ],
         name: 'HCM',
         inspector: true,
@@ -121,34 +113,6 @@ class Constants {
       PgrServiceLocalRepository(
         sql,
         PgrServiceOpLogManager(isar),
-      ),
-      HouseholdMemberLocalRepository(sql, HouseholdMemberOpLogManager(isar)),
-      HouseholdLocalRepository(sql, HouseholdOpLogManager(isar)),
-      ProjectBeneficiaryLocalRepository(
-        sql,
-        ProjectBeneficiaryOpLogManager(
-          isar,
-        ),
-      ),
-      TaskLocalRepository(sql, TaskOpLogManager(isar)),
-      SideEffectLocalRepository(sql, SideEffectOpLogManager(isar)),
-      ReferralLocalRepository(sql, ReferralOpLogManager(isar)),
-      StockLocalRepository(sql, StockOpLogManager(isar)),
-      StockReconciliationLocalRepository(
-        sql,
-        StockReconciliationOpLogManager(isar),
-      ),
-      AttendanceLocalRepository(
-        sql,
-        AttendanceOpLogManager(isar),
-      ),
-      AttendanceLogsLocalRepository(
-        sql,
-        AttendanceLogOpLogManager(isar),
-      ),
-      HFReferralLocalRepository(
-        sql,
-        HFReferralOpLogManager(isar),
       ),
     ];
   }
@@ -214,28 +178,6 @@ class Constants {
           IndividualRemoteRepository(dio, actionMap: actions),
         if (value == DataModelType.downsync)
           DownsyncRemoteRepository(dio, actionMap: actions),
-        if (value == DataModelType.stock)
-          StockRemoteRepository(dio, actionMap: actions),
-        if (value == DataModelType.stockReconciliation)
-          StockReconciliationRemoteRepository(dio, actionMap: actions),
-        if (value == DataModelType.household)
-          HouseholdRemoteRepository(dio, actionMap: actions),
-        if (value == DataModelType.projectBeneficiary)
-          ProjectBeneficiaryRemoteRepository(dio, actionMap: actions),
-        if (value == DataModelType.task)
-          TaskRemoteRepository(dio, actionMap: actions),
-        if (value == DataModelType.householdMember)
-          HouseholdMemberRemoteRepository(dio, actionMap: actions),
-        if (value == DataModelType.sideEffect)
-          SideEffectRemoteRepository(dio, actionMap: actions),
-        if (value == DataModelType.referral)
-          ReferralRemoteRepository(dio, actionMap: actions),
-        if (value == DataModelType.attendanceRegister)
-          AttendanceRemoteRepository(dio, actionMap: actions),
-        if (value == DataModelType.attendance)
-          AttendanceLogRemoteRepository(dio, actionMap: actions),
-        if (value == DataModelType.hFReferral)
-          HFReferralRemoteRepository(dio, actionMap: actions),
       ]);
     }
 
@@ -270,11 +212,6 @@ class Constants {
         entityMapper: EntityMapper(),
         errorDumpApiPath: envConfig.variables.dumpErrorApiPath,
         hierarchyType: envConfig.variables.hierarchyType);
-    RegistrationDeliverySingleton().setTenantId(envConfig.variables.tenantId);
-    ClosedHouseholdSingleton().setTenantId(envConfig.variables.tenantId);
-    AttendanceSingleton().setTenantId(envConfig.variables.tenantId);
-    ReferralReconSingleton().setTenantId(envConfig.variables.tenantId);
-    InventorySingleton().setTenantId(tenantId: envConfig.variables.tenantId);
     SyncServiceSingleton().setData(
       syncDownRetryCount: envConfig.variables.syncDownRetryCount,
       persistenceConfiguration: PersistenceConfiguration.offlineFirst,

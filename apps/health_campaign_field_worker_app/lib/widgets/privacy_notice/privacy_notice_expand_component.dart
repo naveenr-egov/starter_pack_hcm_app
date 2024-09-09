@@ -1,8 +1,8 @@
-import 'package:closed_household/widgets/showcase/showcase_wrappers.dart';
 import 'package:digit_components/theme/colors.dart';
 import 'package:flutter/material.dart';
 import '../../data/local_store/no_sql/schema/app_configuration.dart';
 import '../localized.dart';
+import '../showcase/showcase_wrappers.dart';
 
 class ExpandableSection extends LocalizedStatefulWidget {
   final Content content;

@@ -5,8 +5,7 @@ import 'package:digit_data_model/data_model.dart';
 import 'package:disk_space_update/disk_space_update.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:registration_delivery/registration_delivery.dart';
-import 'package:sync_service/sync_service_lib.dart';
+import 'package:sync_service/utils/utils.dart';
 
 import '../../data/local_store/no_sql/schema/app_configuration.dart';
 import '../../data/local_store/secure_store/secure_store.dart';
@@ -28,28 +27,11 @@ class BeneficiaryDownSyncBloc
   final LocalRepository<DownsyncModel, DownsyncSearchModel>
       downSyncLocalRepository;
   final BandwidthCheckRepository bandwidthCheckRepository;
-  final LocalRepository<HouseholdModel, HouseholdSearchModel>
-  householdLocalRepository;
-  final LocalRepository<HouseholdMemberModel, HouseholdMemberSearchModel>
-  householdMemberLocalRepository;
-  final LocalRepository<ProjectBeneficiaryModel, ProjectBeneficiarySearchModel>
-  projectBeneficiaryLocalRepository;
-  final LocalRepository<TaskModel, TaskSearchModel> taskLocalRepository;
-  final LocalRepository<SideEffectModel, SideEffectSearchModel>
-  sideEffectLocalRepository;
-  final LocalRepository<ReferralModel, ReferralSearchModel>
-      referralLocalRepository;
   BeneficiaryDownSyncBloc({
     required this.individualLocalRepository,
     required this.downSyncRemoteRepository,
     required this.downSyncLocalRepository,
     required this.bandwidthCheckRepository,
-    required this.householdLocalRepository,
-    required this.householdMemberLocalRepository,
-    required this.projectBeneficiaryLocalRepository,
-    required this.taskLocalRepository,
-    required this.sideEffectLocalRepository,
-    required this.referralLocalRepository,
   }) : super(const BeneficiaryDownSyncState._()) {
     on(_handleDownSyncOfBeneficiaries);
     on(_handleCheckTotalCount);
@@ -205,12 +187,6 @@ class BeneficiaryDownSyncBloc
                   .entityMapper
                   ?.writeToEntityDB(downSyncResults, [
                 individualLocalRepository,
-                householdLocalRepository,
-                householdMemberLocalRepository,
-                projectBeneficiaryLocalRepository,
-                taskLocalRepository,
-                sideEffectLocalRepository,
-                referralLocalRepository,
               ]);
               // Update the local downSync data for the boundary with the new values
               totalCount = downSyncResults["DownsyncCriteria"]["totalCount"];

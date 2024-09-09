@@ -131,7 +131,6 @@ class _ComplaintTypePageState extends LocalizedState<ComplaintTypePage> {
                               initialized: (
                                 appConfiguration,
                                 serviceRegistryList,
-                                _,
                               ) {
                                 var complaintTypes = appConfiguration
                                     .complaintTypes

@@ -2,15 +2,12 @@
 import 'dart:async';
 import 'dart:core';
 
-import 'package:attendance_management/attendance_management.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:digit_components/digit_components.dart';
 import 'package:digit_data_model/data_model.dart';
-import 'package:digit_dss/digit_dss.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:inventory_management/inventory_management.dart';
 import 'package:isar/isar.dart';
 import 'package:recase/recase.dart';
 
@@ -47,16 +44,8 @@ class ProjectBloc extends Bloc<ProjectEvent, ProjectState> {
   final LocalRepository<ProjectModel, ProjectSearchModel>
       projectLocalRepository;
 
-  final RemoteRepository<AttendanceRegisterModel, AttendanceRegisterSearchModel>
-      attendanceRemoteRepository;
-  final LocalRepository<AttendanceRegisterModel, AttendanceRegisterSearchModel>
-      attendanceLocalRepository;
   final RemoteRepository<IndividualModel, IndividualSearchModel>
       individualRemoteRepository;
-  final LocalRepository<AttendanceLogModel, AttendanceLogSearchModel>
-      attendanceLogLocalRepository;
-  final RemoteRepository<AttendanceLogModel, AttendanceLogSearchModel>
-      attendanceLogRemoteRepository;
   final LocalRepository<IndividualModel, IndividualSearchModel>
       individualLocalRepository;
 
@@ -71,10 +60,6 @@ class ProjectBloc extends Bloc<ProjectEvent, ProjectState> {
       facilityRemoteRepository;
   final LocalRepository<FacilityModel, FacilitySearchModel>
       facilityLocalRepository;
-
-  /// Stock Repositories
-  final RemoteRepository<StockModel, StockSearchModel> stockRemoteRepository;
-  final LocalRepository<StockModel, StockSearchModel> stockLocalRepository;
 
   final RemoteRepository<ServiceDefinitionModel, ServiceDefinitionSearchModel>
       serviceDefinitionRemoteRepository;
@@ -98,7 +83,6 @@ class ProjectBloc extends Bloc<ProjectEvent, ProjectState> {
       productVariantRemoteRepository;
   final LocalRepository<ProductVariantModel, ProductVariantSearchModel>
       productVariantLocalRepository;
-  final DashboardRemoteRepository dashboardRemoteRepository;
   BuildContext context;
 
   ProjectBloc({
@@ -111,8 +95,6 @@ class ProjectBloc extends Bloc<ProjectEvent, ProjectState> {
     required this.projectFacilityLocalRepository,
     required this.facilityRemoteRepository,
     required this.facilityLocalRepository,
-    required this.stockRemoteRepository,
-    required this.stockLocalRepository,
     required this.serviceDefinitionRemoteRepository,
     required this.boundaryRemoteRepository,
     required this.boundaryLocalRepository,
@@ -123,13 +105,8 @@ class ProjectBloc extends Bloc<ProjectEvent, ProjectState> {
     required this.productVariantLocalRepository,
     required this.productVariantRemoteRepository,
     required this.mdmsRepository,
-    required this.attendanceLocalRepository,
-    required this.attendanceRemoteRepository,
     required this.individualLocalRepository,
     required this.individualRemoteRepository,
-    required this.attendanceLogLocalRepository,
-    required this.attendanceLogRemoteRepository,
-    required this.dashboardRemoteRepository,
     required this.context,
   })  : localSecureStore = localSecureStore ?? LocalSecureStore.instance,
         super(const ProjectState()) {
@@ -221,44 +198,6 @@ class ProjectBloc extends Bloc<ProjectEvent, ProjectState> {
               userUuid: [projectStaff.userId.toString()],
             ),
           );
-          if (individual.isNotEmpty) {
-            final attendanceRegisters = await attendanceRemoteRepository.search(
-              AttendanceRegisterSearchModel(
-                staffId: individual.first.id,
-                referenceId: projectStaff.projectId,
-              ),
-            );
-            await attendanceLocalRepository.bulkCreate(attendanceRegisters);
-
-            for (final register in attendanceRegisters) {
-              if (register.attendees != null &&
-                  (register.attendees ?? []).isNotEmpty) {
-                try {
-                  final individuals = await individualRemoteRepository.search(
-                    IndividualSearchModel(
-                      id: register.attendees!
-                          .map((e) => e.individualId!)
-                          .toList(),
-                    ),
-                  );
-                  await individualLocalRepository.bulkCreate(individuals);
-                  final logs = await attendanceLogRemoteRepository.search(
-                    AttendanceLogSearchModel(
-                      registerId: register.id,
-                    ),
-                  );
-                  await attendanceLogLocalRepository.bulkCreate(logs);
-                } catch (_) {
-                  emit(state.copyWith(
-                    loading: false,
-                    syncError: ProjectSyncErrorType.project,
-                  ));
-
-                  return;
-                }
-              }
-            }
-          }
         }
         staffProjects = await projectRemoteRepository.search(
           ProjectSearchModel(
@@ -440,69 +379,6 @@ class ProjectBloc extends Bloc<ProjectEvent, ProjectState> {
 
     List<BoundaryModel> boundaries;
     try {
-      try {
-        final startDate = DateTime(
-                DateTime.now().year, DateTime.now().month, DateTime.now().day)
-            .toLocal()
-            .millisecondsSinceEpoch;
-        final endDate = DateTime(DateTime.now().year, DateTime.now().month,
-                DateTime.now().day, 23, 59)
-            .toLocal()
-            .millisecondsSinceEpoch;
-        final serviceRegistry = await isar.serviceRegistrys.where().findAll();
-        final dashboardConfig = await isar.dashboardConfigSchemas
-            .where()
-            .filter()
-            .chartsIsNotNull()
-            .chartsIsNotEmpty()
-            .findAll();
-        final dashboardActionPath = Constants.getEndPoint(
-            serviceRegistry: serviceRegistry,
-            service: DashboardResponseModel.schemaName.toUpperCase(),
-            action: ApiOperation.search.toValue(),
-            entityName: DashboardResponseModel.schemaName);
-        if (dashboardConfig.isNotEmpty &&
-            dashboardConfig.first.enableDashboard == true &&
-            dashboardConfig.first.charts != null) {
-          final loggedInIndividualId = await localSecureStore.userIndividualId;
-          final registers = await attendanceLocalRepository.search(
-            AttendanceRegisterSearchModel(
-              staffId: loggedInIndividualId,
-              referenceId: event.model.id,
-            ),
-          );
-          List<String> attendeesIndividualIds = [];
-          registers.forEach((r) {
-            r.attendees?.where((a) => a.individualId != null).forEach((att) {
-              attendeesIndividualIds.add(att.individualId.toString());
-            });
-          });
-          final individuals =
-              await individualLocalRepository.search(IndividualSearchModel(
-            id: attendeesIndividualIds,
-          ));
-          final userUUIDList = individuals
-              .where((ind) => ind.userUuid != null)
-              .map((i) => i.userUuid.toString())
-              .toList();
-          await processDashboardConfig(
-            dashboardConfig.first.charts ?? [],
-            startDate,
-            endDate,
-            isar,
-            DateTime.now(),
-            dashboardRemoteRepository,
-            dashboardActionPath.trim().isNotEmpty
-                ? dashboardActionPath
-                : '/dashboard-analytics/dashboard/getChartV2', //[TODO: To be added to MDMS Service registry
-            envConfig.variables.tenantId,
-            event.model.id,
-            userUUIDList,
-          );
-        }
-      } catch (e) {
-        debugPrint(e.toString());
-      }
       final configResult = await mdmsRepository.searchAppConfig(
         envConfig.variables.mdmsApiPath,
         MdmsRequestModel(

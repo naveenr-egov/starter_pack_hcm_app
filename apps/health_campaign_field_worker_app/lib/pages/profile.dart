@@ -74,7 +74,6 @@ class _ProfilePageState extends LocalizedState<ProfilePage> {
                 initialized: (
                   appConfiguration,
                   serviceRegistryList,
-                  _,
                 ) {
                   return appConfiguration.genderOptions
                       ?.map((e) => e.code)
@@ -263,7 +262,6 @@ class _ProfilePageState extends LocalizedState<ProfilePage> {
                                 initialized: (
                                   appConfiguration,
                                   _,
-                                  __,
                                 ) {
                                   return Column(
                                     children: [

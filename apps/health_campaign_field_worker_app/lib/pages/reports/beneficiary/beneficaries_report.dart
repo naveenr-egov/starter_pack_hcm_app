@@ -72,7 +72,6 @@ class BeneficiariesReportState extends LocalizedState<BeneficiariesReportPage> {
             initialized: (
               appConfiguration,
               _,
-              __,
             ) =>
                 ScrollableContent(
               footer: SizedBox(
